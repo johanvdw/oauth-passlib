@@ -13,8 +13,8 @@ bp = Blueprint('home', __name__)
 
 def current_user():
     if 'id' in session:
-        uid = session['id']
-        return User.query.get(uid)
+        username = session['id']
+        return User(username)
     return None
 
 
@@ -26,20 +26,20 @@ def split_by_crlf(s):
 def home():
     if request.method == 'POST':
         username = request.form.get('username')
-        user = User.query.filter_by(username=username).first()
-        if not user:
-            user = User(username=username)
-            db.session.add(user)
-            db.session.commit()
-        session['id'] = user.id
-        # if user is not just to log in, but need to head back to the auth page, then go for it
-        next_page = request.args.get('next')
-        if next_page:
-            return redirect(next_page)
-        return redirect('/')
+        password = request.form.get('password')
+        user = User(username=username)
+        if user.check_password(password):
+            session['id'] = username
+            # if user is not just to log in, but need to head back to the auth page, then go for it
+            next_page = request.args.get('next')
+            if next_page:
+                return redirect(next_page)
+            return redirect('/')
+        else:
+            print("login failed")
     user = current_user()
     if user:
-        clients = OAuth2Client.query.filter_by(user_id=user.id).all()
+        clients = OAuth2Client.query.filter_by(username=user.username).all()
     else:
         clients = []
 
@@ -65,7 +65,7 @@ def create_client():
     client = OAuth2Client(
         client_id=client_id,
         client_id_issued_at=client_id_issued_at,
-        user_id=user.id,
+        username=user.username,
     )
 
     form = request.form
@@ -104,7 +104,9 @@ def authorize():
         return render_template('authorize.html', user=user, grant=grant)
     if not user and 'username' in request.form:
         username = request.form.get('username')
-        user = User.query.filter_by(username=username).first()
+        password = request.form.get('password')
+        user = User(username=username)
+        user.check_password(password)
     if request.form['confirm']:
         grant_user = user
     else:
@@ -126,4 +128,4 @@ def revoke_token():
 @require_oauth('profile')
 def api_me():
     user = current_token.user
-    return jsonify(id=user.id, username=user.username)
+    return jsonify(username=user.username)

@@ -6,48 +6,71 @@ from authlib.integrations.sqla_oauth2 import (
     OAuth2TokenMixin,
 )
 
+import logging
+import gssapi
+
 db = SQLAlchemy()
 
+logger = logging.getLogger(__name__)
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(40), unique=True)
+SERVER_NAME = gssapi.Name('FOSDEM.ORG@')  # Server's principal name
 
-    def __str__(self):
-        return self.username
-
-    def get_user_id(self):
-        return self.id
+class User:
+    def __init__(self, username):
+        self.username = username
 
     def check_password(self, password):
-        return password == 'valid'
+        user = gssapi.Name(base=self.username, name_type=gssapi.NameType.user)
+        bpass = password.encode('utf-8')
+        try:
+            creds_wrapper = gssapi.raw.acquire_cred_with_password(user, bpass, usage='initiate')
+            creds = creds_wrapper.creds  # Extract the credentials from the wrapper
+
+            # Initialize a security context with the server's principal and user's credentials
+            context = gssapi.SecurityContext(name=SERVER_NAME, creds=creds, usage='initiate')
+            return True  # If no exception occurs, authentication is successful
+
+        except gssapi.exceptions.GSSError as er:
+            logger.debug(f"Kerberos authentication failed: {er}")
+            return False
+        except AttributeError:
+            logger.debug("An AttributeError occurred.")
+            return False
 
 
 class OAuth2Client(db.Model, OAuth2ClientMixin):
     __tablename__ = 'oauth2_client'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User')
+    username = db.Column(
+        db.String(40), nullable=False)
+
+    @property
+    def user(self):
+        return User(self.username) 
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
     __tablename__ = 'oauth2_code'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User')
+    username = db.Column(
+        db.String(40), nullable=False)
 
+    @property
+    def user(self):
+        return User(self.username) 
 
 class OAuth2Token(db.Model, OAuth2TokenMixin):
     __tablename__ = 'oauth2_token'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User')
+    username = db.Column(
+        db.String(40), nullable=False)
+
+    @property
+    def user(self):
+        return User(self.username) 
 
     def is_refresh_token_active(self):
         if self.revoked:
