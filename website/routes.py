@@ -39,7 +39,7 @@ def home():
             print("login failed")
     user = current_user()
     if user:
-        clients = OAuth2Client.query.filter_by(username=user.username).all()
+        clients = OAuth2Client.query.filter_by(user_id=user.user_id).all()
     else:
         clients = []
 
@@ -65,7 +65,7 @@ def create_client():
     client = OAuth2Client(
         client_id=client_id,
         client_id_issued_at=client_id_issued_at,
-        username=user.username,
+        user_id=user.user_id,
     )
 
     form = request.form
@@ -128,4 +128,4 @@ def revoke_token():
 @require_oauth('profile')
 def api_me():
     user = current_token.user
-    return jsonify(username=user.username)
+    return jsonify(username=user.user_id)

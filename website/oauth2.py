@@ -48,12 +48,12 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
         db.session.commit()
 
     def authenticate_user(self, authorization_code):
-        return User.query.get(authorization_code.user_id)
+        return authorization_code.user
 
 
 class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
     def authenticate_user(self, username, password):
-        user = User.query.filter_by(username=username).first()
+        user = User(username=username)
         if user is not None and user.check_password(password):
             return user
 
@@ -65,7 +65,7 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
             return token
 
     def authenticate_user(self, credential):
-        return User.query.get(credential.user_id)
+        return credential.user
 
     def revoke_old_credential(self, credential):
         credential.revoked = True
