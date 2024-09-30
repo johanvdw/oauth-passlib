@@ -52,6 +52,8 @@ johanvdw:
 
 Note that users not present in kerberos but not in the `user_info.yml` file, can still login.
 
+After changes to the files, the service must be restarted (also in dev mode, that only reloads if code changes).
+
 ## Test kerberos server
 
 I have used a docker image https://github.com/NORDUnet/krb5-docker for testing:

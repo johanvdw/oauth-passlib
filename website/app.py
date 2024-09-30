@@ -2,7 +2,7 @@ import os
 import yaml
 
 from flask import Flask
-from .models import db, read_userinfo, set_realm
+from .models import db, Userinfo
 from .oauth2 import config_oauth, read_clients
 from .routes import bp
 
@@ -28,7 +28,27 @@ def create_app(config=None):
     return app
 
 
+
+def read_userinfo(filename):
+    with open(filename, "r") as f:
+        user_confs = yaml.safe_load(f)
+
+    extra_user_info = {}
+    # convert to object to make sure we do some validation
+    for username in user_confs:
+        user = Userinfo(**user_confs[username])
+        extra_user_info[username] = user
+    return extra_user_info
+
 def setup_app(app):
+    settings_file = os.environ.get("OAUTH_SETTINGS", "settings.yml")
+    with open(settings_file, "r") as f:
+        settings = yaml.safe_load(f)
+
+    read_clients(settings["clients"])
+    app.config['USER_INFO'] = read_userinfo(settings["users"])
+    app.config['REALM'] = settings["realm"]
+
 
     db.init_app(app)
     # Create tables if they do not exist already
@@ -36,12 +56,5 @@ def setup_app(app):
         db.create_all()
     config_oauth(app)
 
-    settings_file = os.environ.get("OAUTH_SETTINGS", "settings.yml")
-    with open(settings_file, "r") as f:
-        settings = yaml.safe_load(f)
-
-    set_realm(settings["realm"])
-    read_clients(settings["clients"])
-    read_userinfo(settings["users"])
 
     app.register_blueprint(bp, url_prefix="")

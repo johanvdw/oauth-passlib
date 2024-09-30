@@ -26,7 +26,7 @@ def home():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        user = User(username=username, realm="NORDU.NET")
+        user = User(username=username)
         if user.check_password(password):
             session["id"] = username
             # if user is not just to log in, but need to head back to the auth page, then go for it

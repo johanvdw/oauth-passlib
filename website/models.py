@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import time
 import yaml
 from flask_sqlalchemy import SQLAlchemy
+from flask import current_app
 from authlib.integrations.sqla_oauth2 import (
     OAuth2ClientMixin,
     OAuth2AuthorizationCodeMixin,
@@ -15,20 +16,11 @@ db = SQLAlchemy()
 
 logger = logging.getLogger(__name__)
 
-extra_user_info = {}
-
-realm = ""
-
-
-def set_realm(new_realm):
-    realm = new_realm
-
-
 class User:
-    def __init__(self, username, realm=realm):
+    def __init__(self, username):
         self.user_id = username
-        self.extra_info = extra_user_info.get(username, None)
-        self.realm = realm
+        self.extra_info = current_app.config.get('USER_INFO').get(username, None)
+        self.realm = current_app.config.get('REALM')
 
     def get_user_id(self):
         return self.user_id
@@ -93,14 +85,7 @@ class Userinfo:
     full_name: str
 
 
-def read_userinfo(filename):
-    with open(filename, "r") as f:
-        user_confs = yaml.safe_load(f)
 
-    # convert to object to make sure we do some validation
-    for username in user_confs:
-        user = Userinfo(**user_confs[username])
-        extra_user_info[username] = user
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
