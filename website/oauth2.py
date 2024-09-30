@@ -1,5 +1,3 @@
-
-
 from authlib.integrations.flask_oauth2 import (
     AuthorizationServer,
     ResourceProtector,
@@ -13,18 +11,19 @@ from authlib.integrations.sqla_oauth2 import (
 from authlib.oauth2.rfc6749 import grants
 from authlib.oauth2.rfc7636 import CodeChallenge
 from .models import db, User
-from .models import  OAuth2AuthorizationCode, OAuth2Token, OAuth2Client
+from .models import OAuth2AuthorizationCode, OAuth2Token, OAuth2Client
+
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     TOKEN_ENDPOINT_AUTH_METHODS = [
-        'client_secret_basic',
-        'client_secret_post',
-        'none',
+        "client_secret_basic",
+        "client_secret_post",
+        "none",
     ]
 
     def save_authorization_code(self, code, request):
-        code_challenge = request.data.get('code_challenge')
-        code_challenge_method = request.data.get('code_challenge_method')
+        code_challenge = request.data.get("code_challenge")
+        code_challenge_method = request.data.get("code_challenge_method")
         print(request.user.user_id)
         auth_code = OAuth2AuthorizationCode(
             code=code,
@@ -41,7 +40,8 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
 
     def query_authorization_code(self, code, client):
         auth_code = OAuth2AuthorizationCode.query.filter_by(
-            code=code, client_id=client.client_id).first()
+            code=code, client_id=client.client_id
+        ).first()
         if auth_code and not auth_code.is_expired():
             return auth_code
 
@@ -75,16 +75,18 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
         db.session.commit()
 
 
+clients = {}
 
-
-clients={}
 
 def read_clients():
-    client = OAuth2Client(client_id="5VU7NWyRdFYRldWDuac8k6eR",
+    client = OAuth2Client(
+        client_id="5VU7NWyRdFYRldWDuac8k6eR",
         client_secret="UeS7aDxByNSwIuQ9U7kdSCFBxxzOf6Xbn1yNVLf7gZbp1fnQ",
-        token_endpoint_auth_method="client_secret_basic",        
-        redirect_uris=["http://jef.be"])
+        token_endpoint_auth_method="client_secret_basic",
+        redirect_uris=["http://jef.be"],
+    )
     clients[client.client_id] = client
+
 
 def query_client(client_id):
     return clients[client_id]

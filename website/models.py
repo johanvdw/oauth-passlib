@@ -14,24 +14,29 @@ db = SQLAlchemy()
 
 logger = logging.getLogger(__name__)
 
-SERVER_NAME = gssapi.Name('FOSDEM.ORG@')  # Server's principal name
+SERVER_NAME = gssapi.Name("FOSDEM.ORG@")  # Server's principal name
+
 
 class User:
     def __init__(self, username):
         self.user_id = username
-    
+
     def get_user_id(self):
         return self.user_id
 
     def check_password(self, password):
         user = gssapi.Name(base=self.user_id, name_type=gssapi.NameType.user)
-        bpass = password.encode('utf-8')
+        bpass = password.encode("utf-8")
         try:
-            creds_wrapper = gssapi.raw.acquire_cred_with_password(user, bpass, usage='initiate')
+            creds_wrapper = gssapi.raw.acquire_cred_with_password(
+                user, bpass, usage="initiate"
+            )
             creds = creds_wrapper.creds  # Extract the credentials from the wrapper
 
             # Initialize a security context with the server's principal and user's credentials
-            context = gssapi.SecurityContext(name=SERVER_NAME, creds=creds, usage='initiate')
+            context = gssapi.SecurityContext(
+                name=SERVER_NAME, creds=creds, usage="initiate"
+            )
             return True  # If no exception occurs, authentication is successful
 
         except gssapi.exceptions.GSSError as er:
@@ -40,7 +45,7 @@ class User:
 
 
 @dataclass
-class OAuth2Client():
+class OAuth2Client:
     client_id: str
     client_secret: str
     token_endpoint_auth_method: str
@@ -51,40 +56,41 @@ class OAuth2Client():
 
     def check_endpoint_auth_method(self, method, endpoint):
         return method == self.token_endpoint_auth_method
-    
+
     def check_grant_type(self, grant_type):
         # we only support authorization code
-        return grant_type == 'authorization_code'
+        return grant_type == "authorization_code"
 
     def check_redirect_uri(self, redirect_uri):
         return redirect_uri in self.redirect_uris
 
     def check_response_type(self, response_type):
         return response_type in ["code"]
+
     def get_allowed_scope(self, scope):
         return "profile"
 
+
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
-    __tablename__ = 'oauth2_code'
+    __tablename__ = "oauth2_code"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.String(40), nullable=False)
+    user_id = db.Column(db.String(40), nullable=False)
 
     @property
     def user(self):
-        return User(self.user_id) 
+        return User(self.user_id)
+
 
 class OAuth2Token(db.Model, OAuth2TokenMixin):
-    __tablename__ = 'oauth2_token'
+    __tablename__ = "oauth2_token"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.String(40), nullable=False)
+    user_id = db.Column(db.String(40), nullable=False)
 
     @property
     def user(self):
-        return User(self.user_id) 
+        return User(self.user_id)
 
     def is_refresh_token_active(self):
         if self.revoked:
