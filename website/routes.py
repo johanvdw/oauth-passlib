@@ -5,7 +5,7 @@ from werkzeug.security import gen_salt
 from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error
 from .models import db, User, OAuth2Client
-from .oauth2 import authorization, require_oauth
+from .oauth2 import authorization, require_oauth, clients
 
 
 bp = Blueprint('home', __name__)
@@ -38,10 +38,6 @@ def home():
         else:
             print("login failed")
     user = current_user()
-    if user:
-        clients = OAuth2Client.query.filter_by(user_id=user.user_id).all()
-    else:
-        clients = []
 
     return render_template('home.html', user=user, clients=clients)
 

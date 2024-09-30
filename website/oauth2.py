@@ -1,3 +1,5 @@
+
+
 from authlib.integrations.flask_oauth2 import (
     AuthorizationServer,
     ResourceProtector,
@@ -11,8 +13,7 @@ from authlib.integrations.sqla_oauth2 import (
 from authlib.oauth2.rfc6749 import grants
 from authlib.oauth2.rfc7636 import CodeChallenge
 from .models import db, User
-from .models import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
-
+from .models import  OAuth2AuthorizationCode, OAuth2Token, OAuth2Client
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     TOKEN_ENDPOINT_AUTH_METHODS = [
@@ -24,12 +25,13 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     def save_authorization_code(self, code, request):
         code_challenge = request.data.get('code_challenge')
         code_challenge_method = request.data.get('code_challenge_method')
+        print(request.user.user_id)
         auth_code = OAuth2AuthorizationCode(
             code=code,
             client_id=request.client.client_id,
             redirect_uri=request.redirect_uri,
             scope=request.scope,
-            user_id=request.user.id,
+            user_id=request.user.user_id,
             code_challenge=code_challenge,
             code_challenge_method=code_challenge_method,
         )
@@ -73,7 +75,22 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
         db.session.commit()
 
 
-query_client = create_query_client_func(db.session, OAuth2Client)
+
+
+clients={}
+
+def read_clients():
+    client = OAuth2Client(client_id="5VU7NWyRdFYRldWDuac8k6eR",
+        client_secret="UeS7aDxByNSwIuQ9U7kdSCFBxxzOf6Xbn1yNVLf7gZbp1fnQ",
+        token_endpoint_auth_method="client_secret_basic",
+        
+        redirect_uris=["http://jef.be"])
+    clients[client.client_id] = client
+
+def query_client(client_id):
+    return clients[client_id]
+
+
 save_token = create_save_token_func(db.session, OAuth2Token)
 authorization = AuthorizationServer(
     query_client=query_client,
@@ -84,6 +101,7 @@ require_oauth = ResourceProtector()
 
 def config_oauth(app):
     authorization.init_app(app)
+    read_clients()
 
     # support all grants
     authorization.register_grant(grants.ImplicitGrant)

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import time
 from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.sqla_oauth2 import (
@@ -36,22 +37,32 @@ class User:
         except gssapi.exceptions.GSSError as er:
             logger.debug(f"Kerberos authentication failed: {er}")
             return False
-        except AttributeError:
-            logger.debug("An AttributeError occurred.")
-            return False
 
 
-class OAuth2Client(db.Model, OAuth2ClientMixin):
-    __tablename__ = 'oauth2_client'
+@dataclass
+class OAuth2Client():
+    client_id: str
+    client_secret: str
+    token_endpoint_auth_method: str
+    redirect_uris: list
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.String(40), nullable=False)
+    def check_client_secret(self, client_secret):
+        return client_secret == self.client_secret
 
-    @property
-    def user(self):
-        return User(self.user_id) 
+    def check_endpoint_auth_method(self, method, endpoint):
+        return method == self.token_endpoint_auth_method
+    
+    def check_grant_type(self, grant_type):
+        # we only support authorization code
+        return grant_type == 'authorization_code'
 
+    def check_redirect_uri(self, redirect_uri):
+        return redirect_uri in self.redirect_uris
+
+    def check_response_type(self, response_type):
+        return response_type in ["code"]
+    def get_allowed_scope(self, scope):
+        return "profile"
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
     __tablename__ = 'oauth2_code'
