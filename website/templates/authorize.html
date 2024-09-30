@@ -8,15 +8,12 @@
 </head>
 <body>
     <div class="container">
-        <img src="/static/fosdem-gear.svg" alt="FOSDEM logo">
+        <img src="/static/gear.svg" alt="FOSDEM logo">
         
         <p>The application <strong>{{grant.client.client_name}}</strong> is requesting:
-          <strong>{{ grant.request.scope }}</strong>
+          <strong>{{ grant.request.scope }}</strong> from <strong>{{ user.user_id }}</strong>
           </p>
 
-        <p>
-            From You - a.k.a. <strong>{{ user.user_id }}</strong>
-        </p>
 
         <form action="" method="post">
             <label>

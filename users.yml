@@ -1,0 +1,10 @@
+johanvdw:
+  full_name: "Johan Van de Wauw"
+  groups:
+  - nav
+  - program
+  - website
+
+pwman:
+  full_name: "test other kdc"
+  groups: []

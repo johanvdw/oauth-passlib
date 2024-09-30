@@ -1,7 +1,9 @@
 import os
+import yaml
+
 from flask import Flask
-from .models import db
-from .oauth2 import config_oauth
+from .models import db, read_userinfo, set_realm
+from .oauth2 import config_oauth, read_clients
 from .routes import bp
 
 
@@ -33,4 +35,13 @@ def setup_app(app):
     with app.app_context():
         db.create_all()
     config_oauth(app)
+
+    settings_file = os.environ.get("OAUTH_SETTINGS", "settings.yml")
+    with open(settings_file, "r") as f:
+        settings = yaml.safe_load(f)
+
+    set_realm(settings["realm"])
+    read_clients(settings["clients"])
+    read_userinfo(settings["users"])
+
     app.register_blueprint(bp, url_prefix="")

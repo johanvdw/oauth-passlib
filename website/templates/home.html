@@ -10,18 +10,12 @@
 {% if user %}
 <div class="container">
   <img src="/static/gear.svg" alt="FOSDEM logo">
-  <div class="user-info">Logged in as <strong>{{user.user_id}}</strong> (<span class="logout-link"><a href="{{ url_for('.logout') }}">Log Out</a></span>)</div>
+  <div class="user-info">Logged in as <strong>{{user.extra_info.full_name}} ({{user.user_id}})</strong> (<span class="logout-link"><a href="{{ url_for('.logout') }}">Log Out</a></span>)</div>
 
   {% for client in clients %}
   <pre>
-  <strong>Client Info</strong>
-    {%- for key in client.client_info %}
-    <strong>{{ key }}: </strong>{{ client.client_info[key] }}
-    {%- endfor %}
-  <strong>Client Metadata</strong>
-    {%- for key in client.client_metadata %}
-    <strong>{{ key }}: </strong>{{ client.client_metadata[key] }}
-    {%- endfor %}
+  <strong>User extra Info</strong>
+  {{user.extra_info}}
   </pre>
   <hr>
 </div>
@@ -33,7 +27,7 @@
 
     <div class="container">
         <img src="/static/gear.svg" alt="FOSDEM logo">
-        <h1>Login / Signup</h1>
+        <h1>Login</h1>
         <form action="" method="post">
             <input type="text" name="username" placeholder="Username" required>
             <input type="password" name="password" placeholder="Password" required>

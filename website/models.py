@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import time
+import yaml
 from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.sqla_oauth2 import (
     OAuth2ClientMixin,
@@ -14,18 +15,28 @@ db = SQLAlchemy()
 
 logger = logging.getLogger(__name__)
 
-SERVER_NAME = gssapi.Name("FOSDEM.ORG@")  # Server's principal name
+extra_user_info = {}
+
+realm = ""
+
+
+def set_realm(new_realm):
+    realm = new_realm
 
 
 class User:
-    def __init__(self, username):
+    def __init__(self, username, realm=realm):
         self.user_id = username
+        self.extra_info = extra_user_info.get(username, None)
+        self.realm = realm
 
     def get_user_id(self):
         return self.user_id
 
     def check_password(self, password):
-        user = gssapi.Name(base=self.user_id, name_type=gssapi.NameType.user)
+        user = gssapi.Name(
+            base=f"{self.user_id}@{self.realm}", name_type=gssapi.NameType.user
+        )
         bpass = password.encode("utf-8")
         try:
             creds_wrapper = gssapi.raw.acquire_cred_with_password(
@@ -35,12 +46,14 @@ class User:
 
             # Initialize a security context with the server's principal and user's credentials
             context = gssapi.SecurityContext(
-                name=SERVER_NAME, creds=creds, usage="initiate"
+                name=f"{self.realm}@", creds=creds, usage="initiate"
             )
+
             return True  # If no exception occurs, authentication is successful
 
         except gssapi.exceptions.GSSError as er:
-            logger.debug(f"Kerberos authentication failed: {er}")
+            logger.info(f"Kerberos authentication failed: {er}")
+            print(er)
             return False
 
 
@@ -48,6 +61,7 @@ class User:
 class OAuth2Client:
     client_id: str
     client_secret: str
+    client_name: str
     token_endpoint_auth_method: str
     redirect_uris: list
 
@@ -69,6 +83,24 @@ class OAuth2Client:
 
     def get_allowed_scope(self, scope):
         return "profile"
+
+
+@dataclass
+class Userinfo:
+    """Store extra userinfo such as groups"""
+
+    groups: list
+    full_name: str
+
+
+def read_userinfo(filename):
+    with open(filename, "r") as f:
+        user_confs = yaml.safe_load(f)
+
+    # convert to object to make sure we do some validation
+    for username in user_confs:
+        user = Userinfo(**user_confs[username])
+        extra_user_info[username] = user
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):

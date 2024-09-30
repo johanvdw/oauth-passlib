@@ -1,4 +1,5 @@
 import time
+import logging
 from flask import Blueprint, request, session, url_for
 from flask import render_template, redirect, jsonify
 from werkzeug.security import gen_salt
@@ -9,6 +10,8 @@ from .oauth2 import authorization, require_oauth, clients
 
 
 bp = Blueprint("home", __name__)
+
+logger = logging.getLogger(__name__)
 
 
 def current_user():
@@ -23,7 +26,7 @@ def home():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        user = User(username=username)
+        user = User(username=username, realm="NORDU.NET")
         if user.check_password(password):
             session["id"] = username
             # if user is not just to log in, but need to head back to the auth page, then go for it
@@ -32,7 +35,7 @@ def home():
                 return redirect(next_page)
             return redirect("/")
         else:
-            print("login failed")
+            logger.info("login failed - username: {{ username }}")
     user = current_user()
 
     return render_template("home.html", user=user, clients=clients)
@@ -61,7 +64,7 @@ def authorize():
         password = request.form.get("password")
         user = User(username=username)
         user.check_password(password)
-    if request.form["confirm"]:
+    if "confirm" in request.form and request.form["confirm"]:
         grant_user = user
     else:
         grant_user = None
@@ -82,4 +85,5 @@ def revoke_token():
 @require_oauth("profile")
 def api_me():
     user = current_token.user
-    return jsonify(username=user.user_id)
+
+    return jsonify(username=user.user_id, extra_info=user.extra_info)

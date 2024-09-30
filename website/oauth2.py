@@ -1,3 +1,4 @@
+import yaml
 from authlib.integrations.flask_oauth2 import (
     AuthorizationServer,
     ResourceProtector,
@@ -24,7 +25,6 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     def save_authorization_code(self, code, request):
         code_challenge = request.data.get("code_challenge")
         code_challenge_method = request.data.get("code_challenge_method")
-        print(request.user.user_id)
         auth_code = OAuth2AuthorizationCode(
             code=code,
             client_id=request.client.client_id,
@@ -78,14 +78,14 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
 clients = {}
 
 
-def read_clients():
-    client = OAuth2Client(
-        client_id="5VU7NWyRdFYRldWDuac8k6eR",
-        client_secret="UeS7aDxByNSwIuQ9U7kdSCFBxxzOf6Xbn1yNVLf7gZbp1fnQ",
-        token_endpoint_auth_method="client_secret_basic",
-        redirect_uris=["http://jef.be"],
-    )
-    clients[client.client_id] = client
+def read_clients(filename):
+    with open(filename, "r") as f:
+        client_confs = yaml.safe_load(f)
+    for i in client_confs:
+        client_id = client_confs[i]["client_id"]
+        client = OAuth2Client(client_name=i, **client_confs[i])
+        clients[client_id] = client
+    return clients
 
 
 def query_client(client_id):
@@ -102,7 +102,6 @@ require_oauth = ResourceProtector()
 
 def config_oauth(app):
     authorization.init_app(app)
-    read_clients()
 
     # support all grants
     authorization.register_grant(grants.ImplicitGrant)
