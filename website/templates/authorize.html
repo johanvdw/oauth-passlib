@@ -1,23 +1,38 @@
-<p>The application <strong>{{grant.client.client_name}}</strong> is requesting:
-<strong>{{ grant.request.scope }}</strong>
-</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consent Request</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <div class="container">
+        <img src="/static/fosdem-gear.svg" alt="FOSDEM logo">
+        
+        <p>The application <strong>{{grant.client.client_name}}</strong> is requesting:
+          <strong>{{ grant.request.scope }}</strong>
+          </p>
 
-<p>
-  from You - a.k.a. <strong>{{ user.username }}</strong>
-</p>
+        <p>
+            From You - a.k.a. <strong>{{ user.user_id }}</strong>
+        </p>
 
-<form action="" method="post">
-  <label>
-    <input type="checkbox" name="confirm">
-    <span>Consent?</span>
-  </label>
-  {% if not user %}
-  <p>You haven't logged in. Log in with:</p>
-  <div>
-    <input type="text" name="username">
-    <input type="password" name="password">
-  </div>
-  {% endif %}
-  <br>
-  <button>Submit</button>
-</form>
+        <form action="" method="post">
+            <label>
+                <input type="checkbox" name="confirm">
+                <span>Consent?</span>
+            </label>
+            {% if not user %}
+            <p>You haven't logged in. Log in with:</p>
+            <div>
+              <input type="text" name="username">
+              <input type="password" name="password">
+            </div>
+            {% endif %}
+            
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

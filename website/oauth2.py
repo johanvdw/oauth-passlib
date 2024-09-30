@@ -82,8 +82,7 @@ clients={}
 def read_clients():
     client = OAuth2Client(client_id="5VU7NWyRdFYRldWDuac8k6eR",
         client_secret="UeS7aDxByNSwIuQ9U7kdSCFBxxzOf6Xbn1yNVLf7gZbp1fnQ",
-        token_endpoint_auth_method="client_secret_basic",
-        
+        token_endpoint_auth_method="client_secret_basic",        
         redirect_uris=["http://jef.be"])
     clients[client.client_id] = client
 

@@ -1,27 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
 {% if user %}
-<style>pre{white-space:wrap}</style>
-<div>Logged in as <strong>{{user}}</strong> (<a href="{{ url_for('.logout') }}">Log Out</a>)</div>
+<div class="container">
+  <img src="/static/gear.svg" alt="FOSDEM logo">
+  <div class="user-info">Logged in as <strong>{{user.user_id}}</strong> (<span class="logout-link"><a href="{{ url_for('.logout') }}">Log Out</a></span>)</div>
 
-{% for client in clients %}
-<pre>
-<strong>Client Info</strong>
-  {%- for key in client.client_info %}
-  <strong>{{ key }}: </strong>{{ client.client_info[key] }}
-  {%- endfor %}
-<strong>Client Metadata</strong>
-  {%- for key in client.client_metadata %}
-  <strong>{{ key }}: </strong>{{ client.client_metadata[key] }}
-  {%- endfor %}
-</pre>
-<hr>
+  {% for client in clients %}
+  <pre>
+  <strong>Client Info</strong>
+    {%- for key in client.client_info %}
+    <strong>{{ key }}: </strong>{{ client.client_info[key] }}
+    {%- endfor %}
+  <strong>Client Metadata</strong>
+    {%- for key in client.client_metadata %}
+    <strong>{{ key }}: </strong>{{ client.client_metadata[key] }}
+    {%- endfor %}
+  </pre>
+  <hr>
+</div>
 {% endfor %}
 
-<br><a href="{{ url_for('.create_client') }}">Create Client</a>
 
 {% else %}
-<form action="" method="post">
-  <input type="text" name="username" placeholder="username">
-  <input type="password" name="password" placeholder="password">
-  <button type="submit">Login / Signup</button>
-</form>
+
+
+    <div class="container">
+        <img src="/static/gear.svg" alt="FOSDEM logo">
+        <h1>Login / Signup</h1>
+        <form action="" method="post">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
 {% endif %}
+</body>
+</html>
