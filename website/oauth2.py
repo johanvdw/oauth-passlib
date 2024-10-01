@@ -11,6 +11,8 @@ from authlib.integrations.sqla_oauth2 import (
 )
 from authlib.oauth2.rfc6749 import grants
 from authlib.oauth2.rfc7636 import CodeChallenge
+from authlib.oidc.core import UserInfo
+from flask import current_app
 from .models import db, User
 from .models import OAuth2AuthorizationCode, OAuth2Token, OAuth2Client
 
@@ -75,21 +77,8 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
         db.session.commit()
 
 
-clients = {}
-
-
-def read_clients(filename):
-    with open(filename, "r") as f:
-        client_confs = yaml.safe_load(f)
-    for i in client_confs:
-        client_id = client_confs[i]["client_id"]
-        client = OAuth2Client(client_name=i, **client_confs[i])
-        clients[client_id] = client
-    return clients
-
-
 def query_client(client_id):
-    return clients[client_id]
+    return current_app.config["CLIENTS"][client_id]
 
 
 save_token = create_save_token_func(db.session, OAuth2Token)
@@ -117,3 +106,11 @@ def config_oauth(app):
     # protect resource
     bearer_cls = create_bearer_token_validator(db.session, OAuth2Token)
     require_oauth.register_token_validator(bearer_cls())
+
+
+def generate_user_info(user, scope):
+    return UserInfo(
+        sub=str(user.user_id),
+        name=user.extra_info.full_name,
+        email=user.extra_info.email,
+    )

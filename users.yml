@@ -1,5 +1,6 @@
 johanvdw:
   full_name: "Johan Van de Wauw"
+  email: johanvdw@fosdem.org
   groups:
   - nav
   - program
@@ -8,3 +9,4 @@ johanvdw:
 pwman:
   full_name: "test other kdc"
   groups: []
+  email: pwman@testerdetest

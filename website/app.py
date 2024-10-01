@@ -2,8 +2,8 @@ import os
 import yaml
 
 from flask import Flask
-from .models import db, Userinfo
-from .oauth2 import config_oauth, read_clients
+from .models import db, ExtraUserinfo, OAuth2Client
+from .oauth2 import config_oauth
 from .routes import bp
 
 
@@ -28,7 +28,6 @@ def create_app(config=None):
     return app
 
 
-
 def read_userinfo(filename):
     with open(filename, "r") as f:
         user_confs = yaml.safe_load(f)
@@ -36,25 +35,35 @@ def read_userinfo(filename):
     extra_user_info = {}
     # convert to object to make sure we do some validation
     for username in user_confs:
-        user = Userinfo(**user_confs[username])
+        user = ExtraUserinfo(**user_confs[username])
         extra_user_info[username] = user
     return extra_user_info
+
+
+def read_clients(filename):
+    clients = {}
+    with open(filename, "r") as f:
+        client_confs = yaml.safe_load(f)
+    for i in client_confs:
+        client_id = client_confs[i]["client_id"]
+        client = OAuth2Client(client_name=i, **client_confs[i])
+        clients[client_id] = client
+    return clients
+
 
 def setup_app(app):
     settings_file = os.environ.get("OAUTH_SETTINGS", "settings.yml")
     with open(settings_file, "r") as f:
         settings = yaml.safe_load(f)
 
-    read_clients(settings["clients"])
-    app.config['USER_INFO'] = read_userinfo(settings["users"])
-    app.config['REALM'] = settings["realm"]
-
+    app.config["CLIENTS"] = read_clients(settings["clients"])
+    app.config["EXTRA_USER_INFO"] = read_userinfo(settings["users"])
+    app.config["REALM"] = settings["realm"]
 
     db.init_app(app)
     # Create tables if they do not exist already
     with app.app_context():
         db.create_all()
     config_oauth(app)
-
 
     app.register_blueprint(bp, url_prefix="")

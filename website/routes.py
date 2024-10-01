@@ -2,11 +2,12 @@ import time
 import logging
 from flask import Blueprint, request, session, url_for
 from flask import render_template, redirect, jsonify
+from flask import current_app
 from werkzeug.security import gen_salt
 from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error
 from .models import db, User, OAuth2Client
-from .oauth2 import authorization, require_oauth, clients
+from .oauth2 import authorization, require_oauth, generate_user_info
 
 
 bp = Blueprint("home", __name__)
@@ -38,7 +39,9 @@ def home():
             logger.info("login failed - username: {{ username }}")
     user = current_user()
 
-    return render_template("home.html", user=user, clients=clients)
+    return render_template(
+        "home.html", user=user, clients=current_app.config["CLIENTS"]
+    )
 
 
 @bp.route("/logout")
@@ -81,9 +84,7 @@ def revoke_token():
     return authorization.create_endpoint_response("revocation")
 
 
-@bp.route("/api/me")
+@bp.route("/oauth/userinfo")
 @require_oauth("profile")
 def api_me():
-    user = current_token.user
-
-    return jsonify(username=user.user_id, extra_info=user.extra_info)
+    return jsonify(generate_user_info(current_token.user, current_token.scope))

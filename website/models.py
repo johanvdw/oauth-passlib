@@ -16,11 +16,12 @@ db = SQLAlchemy()
 
 logger = logging.getLogger(__name__)
 
+
 class User:
     def __init__(self, username):
         self.user_id = username
-        self.extra_info = current_app.config.get('USER_INFO').get(username, None)
-        self.realm = current_app.config.get('REALM')
+        self.extra_info = current_app.config.get("EXTRA_USER_INFO").get(username, None)
+        self.realm = current_app.config.get("REALM")
 
     def get_user_id(self):
         return self.user_id
@@ -50,6 +51,15 @@ class User:
 
 
 @dataclass
+class ExtraUserinfo:
+    """Store extra userinfo such as groups"""
+
+    groups: list
+    full_name: str
+    email: str
+
+
+@dataclass
 class OAuth2Client:
     client_id: str
     client_secret: str
@@ -74,18 +84,8 @@ class OAuth2Client:
         return response_type in ["code"]
 
     def get_allowed_scope(self, scope):
-        return "profile"
-
-
-@dataclass
-class Userinfo:
-    """Store extra userinfo such as groups"""
-
-    groups: list
-    full_name: str
-
-
-
+        # may need more later
+        return "openid profile"
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
