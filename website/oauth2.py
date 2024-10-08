@@ -69,7 +69,11 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
             return token
 
     def authenticate_user(self, credential):
-        return credential.user
+        if credential.user.valid:
+            return credential.user
+        else:
+            self.revoke_old_credential(credential)
+            return None
 
     def revoke_old_credential(self, credential):
         credential.revoked = True

@@ -22,11 +22,19 @@ class User:
         self.user_id = username
         self.extra_info = current_app.config.get("EXTRA_USER_INFO").get(username, None)
         self.realm = current_app.config.get("REALM")
+        # We don not raise when no extra_user_info is found
+        # rather we mark the user as invalid
+        # if this is the case, tokens will be invalidated
+        # and login will fail
+        self.valid = self.extra_info is not None
 
     def get_user_id(self):
         return self.user_id
 
     def check_password(self, password):
+        if not self.valid:
+            logger.info("username not in users.yml")
+            return False
         user = gssapi.Name(
             base=f"{self.user_id}@{self.realm}", name_type=gssapi.NameType.user
         )
