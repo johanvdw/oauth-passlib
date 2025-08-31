@@ -39,7 +39,7 @@ etherpad:
   redirect_uris: ["http://localhost:8000"]
 ```
 
-The user_info.yml file contains extra info for the users which kerberos will not provide, such as a full_name and group membership.
+The `user_info.yml` file contains extra info for the users which kerberos will not provide, such as a full_name and group membership.
 
 ```
 johanvdw:
@@ -50,7 +50,7 @@ johanvdw:
   - website
 ```
 
-Note that users not present in kerberos but not in the `user_info.yml` file, can still login.
+Note that users present in kerberos but not in the `user_info.yml` file, can not login.
 
 After changes to the files, the service must be restarted (also in dev mode, that only reloads if code changes).
 
