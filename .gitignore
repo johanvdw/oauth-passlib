@@ -1,3 +1,7 @@
 *.sqlite
 *.pyc
 venv/*
+oidc*
+clients.yml
+settings.yml
+users.yml
