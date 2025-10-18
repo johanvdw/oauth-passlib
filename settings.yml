@@ -1,4 +1,4 @@
 realm: FOSDEM.ORG
 users: users.yml
 clients: clients.yml
-domain: unshivering-amusedly-staci.ngrok-free.dev
+domain: id.fosdem.org
