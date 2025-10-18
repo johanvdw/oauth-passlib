@@ -5,6 +5,7 @@ from logging.config import dictConfig
 import yaml
 from authlib.jose import jwk
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .models import ExtraUserinfo, OAuth2Client, db
 from .oauth2 import config_oauth
@@ -35,7 +36,8 @@ def create_app(config=None):
 
     # load default configuration
     app.config.from_object("website.settings")
-
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
+    app.config["PROPAGATE_EXCEPTIONS"] = True
     # load environment configuration
     if "WEBSITE_CONF" in os.environ:
         app.config.from_envvar("WEBSITE_CONF")
