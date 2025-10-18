@@ -1,14 +1,15 @@
-import time
 import logging
-from flask import Blueprint, request, session, url_for
-from flask import render_template, redirect, jsonify
-from flask import current_app
-from werkzeug.security import gen_salt
+import time
+
 from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error
-from .models import db, User, OAuth2Client
-from .oauth2 import authorization, require_oauth, generate_user_info, get_metadata, pubkey
+from flask import (Blueprint, current_app, jsonify, redirect, render_template,
+                   request, session, url_for)
+from werkzeug.security import gen_salt
 
+from .models import OAuth2Client, User, db
+from .oauth2 import (authorization, generate_user_info, get_metadata, pubkey,
+                     require_oauth)
 
 bp = Blueprint("home", __name__)
 
@@ -39,9 +40,7 @@ def home():
             logger.info("login failed - username: {{ username }}")
     user = current_user()
 
-    return render_template(
-        "home.html", user=user
-    )
+    return render_template("home.html", user=user)
 
 
 @bp.route("/logout")
@@ -69,9 +68,9 @@ def authorize():
         password = request.form.get("password")
         user = User(username=username)
         user.check_password(password)
-    #if "confirm" in request.form and request.form["confirm"]:
+    # if "confirm" in request.form and request.form["confirm"]:
     #    grant_user = user
-    #else:
+    # else:
     #    grant_user = None
     grant_user = user
     logging.debug("before creating auth response")
@@ -100,7 +99,7 @@ def api_me():
 def jwk_json():
     return jsonify(pubkey())
 
-@bp.route('/.well-known/openid-configuration')
+
+@bp.route("/.well-known/openid-configuration")
 def openid_configuration():
     return jsonify(get_metadata())
-

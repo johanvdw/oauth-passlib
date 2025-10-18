@@ -1,31 +1,33 @@
+import logging
 import os
-import yaml
+from logging.config import dictConfig
 
+import yaml
+from authlib.jose import jwk
 from flask import Flask
-from .models import db, ExtraUserinfo, OAuth2Client
+
+from .models import ExtraUserinfo, OAuth2Client, db
 from .oauth2 import config_oauth
 from .routes import bp
 
-from authlib.jose import jwk
-
-import logging
-from logging.config import dictConfig
-
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
-    }},
-    'handlers': {'wsgi': {
-        'class': 'logging.StreamHandler',
-        'stream': 'ext://flask.logging.wsgi_errors_stream',
-        'formatter': 'default'
-    }},
-    'root': {
-        'level': 'DEBUG',
-        'handlers': ['wsgi']
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            }
+        },
+        "handlers": {
+            "wsgi": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://flask.logging.wsgi_errors_stream",
+                "formatter": "default",
+            }
+        },
+        "root": {"level": "DEBUG", "handlers": ["wsgi"]},
     }
-})
+)
 
 
 def create_app(config=None):
@@ -80,8 +82,7 @@ def setup_app(app):
     app.config["CLIENTS"] = read_clients(settings["clients"])
     app.config["EXTRA_USER_INFO"] = read_userinfo(settings["users"])
     app.config["REALM"] = settings["realm"]
-    app.config["DOMAIN"] =  settings["domain"]
-
+    app.config["DOMAIN"] = settings["domain"]
 
     with open(app.config["OAUTH2_JWT_RSA_KEY"], "rb") as f:
         app.config["PRIVATE_KEY_DATA"] = f.read()

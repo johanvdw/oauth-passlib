@@ -1,21 +1,20 @@
-from dataclasses import dataclass
-import time
-import yaml
-from flask_sqlalchemy import SQLAlchemy
-from flask import current_app
-from authlib.integrations.sqla_oauth2 import (
-    OAuth2ClientMixin,
-    OAuth2AuthorizationCodeMixin,
-    OAuth2TokenMixin,
-)
-
 import logging
+import time
+from dataclasses import dataclass
+
 import gssapi
+import yaml
+from authlib.integrations.sqla_oauth2 import (OAuth2AuthorizationCodeMixin,
+                                              OAuth2ClientMixin,
+                                              OAuth2TokenMixin)
+from flask import current_app
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
 
 class User:
     def __init__(self, username):
@@ -90,13 +89,13 @@ class OAuth2Client:
 
     def check_response_type(self, response_type):
         logger.debug(response_type)
-        #return response_type in ["code", "code id_token"]
+        # return response_type in ["code", "code id_token"]
         return True
 
     def get_allowed_scope(self, scope):
         # may need more later
         return "openid profile"
-    
+
     def get_client_id(self):
         return self.client_id
 

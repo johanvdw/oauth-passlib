@@ -1,5 +1,6 @@
-from website.app import create_app
 import logging
+
+from website.app import create_app
 
 logging.getLogger("authlib").setLevel(logging.DEBUG)
 
