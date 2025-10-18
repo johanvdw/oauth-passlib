@@ -7,7 +7,7 @@ from werkzeug.security import gen_salt
 from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error
 from .models import db, User, OAuth2Client
-from .oauth2 import authorization, require_oauth, generate_user_info
+from .oauth2 import authorization, require_oauth, generate_user_info, get_metadata, pubkey
 
 
 bp = Blueprint("home", __name__)
@@ -57,9 +57,11 @@ def authorize():
     if not user:
         return redirect(url_for("home.home", next=request.url))
     if request.method == "GET":
+        logging.debug("method get")
         try:
             grant = authorization.get_consent_grant(end_user=user)
         except OAuth2Error as error:
+            raise error
             return error.error
         return render_template("authorize.html", user=user, grant=grant)
     if not user and "username" in request.form:
@@ -67,16 +69,20 @@ def authorize():
         password = request.form.get("password")
         user = User(username=username)
         user.check_password(password)
-    if "confirm" in request.form and request.form["confirm"]:
-        grant_user = user
-    else:
-        grant_user = None
+    #if "confirm" in request.form and request.form["confirm"]:
+    #    grant_user = user
+    #else:
+    #    grant_user = None
+    grant_user = user
+    logging.debug("before creating auth response")
     return authorization.create_authorization_response(grant_user=grant_user)
 
 
 @bp.route("/oauth/token", methods=["POST"])
 def issue_token():
-    return authorization.create_token_response()
+    response = authorization.create_token_response()
+    current_app.logger.debug("Token response: %s", response.get_data(as_text=True))
+    return response
 
 
 @bp.route("/oauth/revoke", methods=["POST"])
@@ -88,3 +94,13 @@ def revoke_token():
 @require_oauth("profile")
 def api_me():
     return jsonify(generate_user_info(current_token.user, current_token.scope))
+
+
+@bp.route("/.well-known/jwks.json")
+def jwk_json():
+    return jsonify(pubkey())
+
+@bp.route('/.well-known/openid-configuration')
+def openid_configuration():
+    return jsonify(get_metadata())
+

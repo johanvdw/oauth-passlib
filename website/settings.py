@@ -1,0 +1,20 @@
+AUTHLIB_OAUTH2_PROVIDER = {"token_expires_in": {"authorization_code": 1800}}
+
+OAUTH2_JWT_ENABLED = True
+OAUTH_JWT_ISS = "https://id.fosdem.org"
+
+OAUTH2_JWT_ALG = 'RS256'
+OAUTH2_JWT_EXP = 3600
+OAUTH2_JWT_KEY = "lequiCgxg3iKt+z9lMsfag=="
+OAUTH2_JWT_RSA_KEY = "oidc.key"
+OAUTH2_JWT_PUBLIC_KEY = "oidc.pem"
+OAUTH2_JWK_KEY_NAME = "oidc"
+OAUTH2_REQUIRE_CONSENT = False
+OAUTH2_REFRESH_TOKEN_GENERATOR = True
+OAUTH2_ACCESS_TOKEN_GENERATOR = True
+#OAUTH2_ACCESS_TOKEN_GENERATOR = "website.oauth2.access_tokens"
+
+REQUIRE_NONCE = False
+
+SECRET_KEY = "geheim2"
+

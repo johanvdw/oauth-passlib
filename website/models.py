@@ -15,7 +15,7 @@ import gssapi
 db = SQLAlchemy()
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.DEBUG)
 
 class User:
     def __init__(self, username):
@@ -33,7 +33,7 @@ class User:
 
     def check_password(self, password):
         if not self.valid:
-            logger.info("username not in users.yml")
+            current_app.logger.info(f"username {self.user_id} not in users.yml")
             return False
         user = gssapi.Name(
             base=f"{self.user_id}@{self.realm}", name_type=gssapi.NameType.user
@@ -89,11 +89,16 @@ class OAuth2Client:
         return redirect_uri in self.redirect_uris
 
     def check_response_type(self, response_type):
-        return response_type in ["code"]
+        logger.debug(response_type)
+        #return response_type in ["code", "code id_token"]
+        return True
 
     def get_allowed_scope(self, scope):
         # may need more later
         return "openid profile"
+    
+    def get_client_id(self):
+        return self.client_id
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):

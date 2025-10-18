@@ -3,3 +3,13 @@ etherpad:
   client_secret: "UeS7aDxByNSwIuQ9U7kdSCFBxxzOf6Xbn1yNVLf7gZbp1fnQ"
   token_endpoint_auth_method: "client_secret_basic"
   redirect_uris: ["http://localhost:8000"]
+openid_connec_debugger:
+  client_id: nenid
+  client_secret: geheimgeheim
+  token_endpoint_auth_method: "client_secret_basic"
+  redirect_uris: ["https://oidcdebugger.com/debug"]
+gitea:
+  client_id: kf2azAuu9gqd4gsB10fFPvtvzJEi7PIE
+  client_secret: e3M2d7hZjzPLDdubnIdiycH59asQfF7ijvgBaf57Xh7dYZqWdI43yz6GnL7hPaU6
+  token_endpoint_auth_method: "client_secret_basic"
+  redirect_uris: ["http://localhost:3000", "http://localhost:3000/user/oauth2/id.fosdem.org/callback"]

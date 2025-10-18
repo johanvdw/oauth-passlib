@@ -6,6 +6,27 @@ from .models import db, ExtraUserinfo, OAuth2Client
 from .oauth2 import config_oauth
 from .routes import bp
 
+from authlib.jose import jwk
+
+import logging
+from logging.config import dictConfig
+
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://flask.logging.wsgi_errors_stream',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['wsgi']
+    }
+})
+
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -59,7 +80,13 @@ def setup_app(app):
     app.config["CLIENTS"] = read_clients(settings["clients"])
     app.config["EXTRA_USER_INFO"] = read_userinfo(settings["users"])
     app.config["REALM"] = settings["realm"]
+    app.config["DOMAIN"] =  settings["domain"]
 
+
+    with open(app.config["OAUTH2_JWT_RSA_KEY"], "rb") as f:
+        app.config["PRIVATE_KEY_DATA"] = f.read()
+    with open(app.config["OAUTH2_JWT_PUBLIC_KEY"], "rb") as f:
+        app.config["PUBLIC_JWK"] = jwk.dumps(f.read(), kty="RSA")
     db.init_app(app)
     # Create tables if they do not exist already
     with app.app_context():
