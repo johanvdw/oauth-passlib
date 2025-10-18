@@ -40,7 +40,7 @@ def home():
     user = current_user()
 
     return render_template(
-        "home.html", user=user, clients=current_app.config["CLIENTS"]
+        "home.html", user=user
     )
 
 

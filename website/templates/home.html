@@ -12,14 +12,12 @@
   <img src="/static/gear.svg" alt="FOSDEM logo">
   <div class="user-info">Logged in as <strong>{{user.extra_info.full_name}} ({{user.user_id}})</strong> (<span class="logout-link"><a href="{{ url_for('.logout') }}">Log Out</a></span>)</div>
 
-  {% for client in clients %}
   <pre>
-  <strong>User extra Info</strong>
+  <strong>User Extra Info</strong>
   {{user.extra_info}}
   </pre>
   <hr>
 </div>
-{% endfor %}
 
 
 {% else %}

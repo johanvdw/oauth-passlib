@@ -131,18 +131,7 @@ require_oauth = ResourceProtector()
 
 def config_oauth(app):
     authorization.init_app(app)
-    authorization.register_grant(AuthorizationCodeGrant, [MyOpenIDCode(require_nonce=False)])
-    #authorization.register_grant(MyOpenIDCode, [CodeChallenge(required=True)])
-    # authorization.register_grant(AuthorizationCodeGrant, [CodeChallenge(required=True)])
-    # support all grants
-    authorization.register_grant(grants.ImplicitGrant)
-    authorization.register_grant(grants.ClientCredentialsGrant)
-    authorization.register_grant(PasswordGrant)
-    authorization.register_grant(RefreshTokenGrant)
-
-
-
-
+    authorization.register_grant(AuthorizationCodeGrant, [MyOpenIDCode(require_nonce=False), CodeChallenge(required=True)])
 
     # support revocation
     revocation_cls = create_revocation_endpoint(db.session, OAuth2Token)
@@ -171,10 +160,10 @@ def get_metadata():
         "response_types_supported": ["code", "code id_token"],
         "subject_types_supported": ["public"],
         "id_token_signing_alg_values_supported": ["RS256"],
-        "scopes_supported": ["openid", "profile", "email"],
+        "scopes_supported": ["openid"],
         "claims_supported": ["sub", "name", "email"],
         "grant_types_supported": ["authorization_code", "implicit", "refresh_token", "client_credentials", "password"],
-        "token_endpoint_auth_methods_supported": ["client_secret_basic", "client_secret_post"],
+        "token_endpoint_auth_methods_supported": ["client_secret_basic"],
         "code_challenge_methods_supported": ["S256"]
             }
 
