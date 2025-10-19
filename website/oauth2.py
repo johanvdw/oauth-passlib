@@ -151,6 +151,7 @@ def generate_user_info(user, scope):
         sub=str(user.user_id),
         name=user.extra_info.full_name,
         email=user.extra_info.email,
+        groups=user.extra_info.groups
     )
 
 
