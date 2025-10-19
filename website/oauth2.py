@@ -166,7 +166,7 @@ def get_metadata():
         "subject_types_supported": ["public"],
         "id_token_signing_alg_values_supported": ["RS256"],
         "scopes_supported": ["openid"],
-        "claims_supported": ["sub", "name", "email"],
+        "claims_supported": ["sub", "name", "email", "groups"],
         "grant_types_supported": [
             "authorization_code",
             "implicit",
