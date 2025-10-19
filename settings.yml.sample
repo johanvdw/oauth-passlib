@@ -2,3 +2,22 @@ realm: FOSDEM.ORG
 users: users.yml
 clients: clients.yml
 domain: id.fosdem.org
+secret_key: geheimpje # sign session cookies
+#oauth_jwt_key: secret32bitkey # signs jwtk currently not used because RS256 is used
+oauth2_jwt_rsa_key: oidc.key
+oauth2_jwt_public_key: oidc.pem
+oauth2_jwt_enabled: true
+
+oauth2_jwt_alg: "rs256"
+oauth2_jwt_exp: 3600
+oauth2_jwk_key_name: "oidc"
+oauth2_require_consent: false
+oauth2_refresh_token_generator: true
+oauth2_access_token_generator: true
+
+require_nonce: false
+
+oauth2_refresh_token_generator: true
+sqlalchemy_track_modifications: false
+sqlalchemy_database_uri: "sqlite:///db.sqlite"
+

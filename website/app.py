@@ -31,27 +31,6 @@ dictConfig(
 )
 
 
-def create_app(config=None):
-    app = Flask(__name__)
-
-    # load default configuration
-    app.config.from_object("website.settings")
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
-    app.config["PROPAGATE_EXCEPTIONS"] = True
-    # load environment configuration
-    if "WEBSITE_CONF" in os.environ:
-        app.config.from_envvar("WEBSITE_CONF")
-
-    # load app specified configuration
-    if config is not None:
-        if isinstance(config, dict):
-            app.config.update(config)
-        elif config.endswith(".py"):
-            app.config.from_pyfile(config)
-
-    setup_app(app)
-    return app
-
 
 def read_userinfo(filename):
     with open(filename, "r") as f:
@@ -76,16 +55,26 @@ def read_clients(filename):
     return clients
 
 
-def setup_app(app):
+def create_app():
+    app = Flask(__name__)
+
+    # ensure https is recognised from header
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
+    
+
     settings_file = os.environ.get("OAUTH_SETTINGS", "settings.yml")
     with open(settings_file, "r") as f:
         settings = yaml.safe_load(f)
 
+    for setting in settings:
+        app.config[setting.upper()] = settings[setting]
+    
     app.config["CLIENTS"] = read_clients(settings["clients"])
     app.config["EXTRA_USER_INFO"] = read_userinfo(settings["users"])
-    app.config["REALM"] = settings["realm"]
-    app.config["DOMAIN"] = settings["domain"]
-
+    app.config["OAUTH_JWT_ISS"] = "https://" + app.config["DOMAIN"] 
+    app.config["PROPAGATE_EXCEPTIONS"] = True
+    app.config["AUTHLIB_OAUTH2_PROVIDER"] = {"token_expires_in": {"authorization_code": 1800}}
+    
     with open(app.config["OAUTH2_JWT_RSA_KEY"], "rb") as f:
         app.config["PRIVATE_KEY_DATA"] = f.read()
     with open(app.config["OAUTH2_JWT_PUBLIC_KEY"], "rb") as f:
@@ -97,3 +86,5 @@ def setup_app(app):
     config_oauth(app)
 
     app.register_blueprint(bp, url_prefix="")
+    
+    return app
