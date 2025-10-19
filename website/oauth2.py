@@ -152,6 +152,7 @@ def generate_user_info(user, scope):
         name=user.extra_info.full_name,
         email=user.extra_info.email,
         groups=user.extra_info.groups,
+        email_verified=user.extra_info.email!=""
     )
 
 
@@ -183,6 +184,6 @@ def get_metadata():
 
 def pubkey():
     keyset = JsonWebKey.import_key(
-        current_app.config["PUBLIC_JWK"], kty="RSA"
+            current_app.config["PUBLIC_JWK"], {"kty": "RSA"}
     ).as_dict()
     return {"keys": [keyset]}
