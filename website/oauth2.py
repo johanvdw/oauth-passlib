@@ -151,7 +151,7 @@ def generate_user_info(user, scope):
         sub=str(user.user_id),
         name=user.extra_info.full_name,
         email=user.extra_info.email,
-        groups=user.extra_info.groups
+        groups=user.extra_info.groups,
     )
 
 
@@ -177,6 +177,7 @@ def get_metadata():
         ],
         "token_endpoint_auth_methods_supported": ["client_secret_basic"],
         "code_challenge_methods_supported": ["S256"],
+        "end_session_endpoint": f"{domain}/logout",
     }
 
 
