@@ -51,29 +51,10 @@ def logout():
 
 @bp.route("/oauth/authorize", methods=["GET", "POST"])
 def authorize():
-    user = current_user()
+    grant_user = current_user()
     # if user log status is not true (Auth server), then to log it in
-    if not user:
+    if not grant_user:
         return redirect(url_for("home.home", next=request.url))
-    if request.method == "GET":
-        logging.debug("method get")
-        try:
-            grant = authorization.get_consent_grant(end_user=user)
-        except OAuth2Error as error:
-            raise error
-            return error.error
-        return render_template("authorize.html", user=user, grant=grant)
-    if not user and "username" in request.form:
-        username = request.form.get("username")
-        password = request.form.get("password")
-        user = User(username=username)
-        user.check_password(password)
-    # if "confirm" in request.form and request.form["confirm"]:
-    #    grant_user = user
-    # else:
-    #    grant_user = None
-    grant_user = user
-    logging.debug("before creating auth response")
     return authorization.create_authorization_response(grant_user=grant_user)
 
 
