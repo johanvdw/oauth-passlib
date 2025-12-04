@@ -61,7 +61,6 @@ def authorize():
 @bp.route("/oauth/token", methods=["POST"])
 def issue_token():
     response = authorization.create_token_response()
-    current_app.logger.debug("Token response: %s", response.get_data(as_text=True))
     return response
 
 
